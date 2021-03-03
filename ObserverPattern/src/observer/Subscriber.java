@@ -9,6 +9,4 @@ import subject.Game;
 
 public interface Subscriber {
 	public void update(Game game);
-
-	//public void update(game.Game game);
 }

@@ -6,6 +6,7 @@ import subject.Game;
 
 
 public class ScoreForecaster implements Subscriber {
+	static int quarter;
 	final double SCOREMOD = 16; // used to calculate score prediction 
 	final int SIMROUNDS = 100; // number of rounds to simulate when predicting score
 	ArrayList<Float> scoreAccuracies;
@@ -24,12 +25,12 @@ public class ScoreForecaster implements Subscriber {
 	}
 	
 	public void update(Game game) {
+		quarter = game.getQuarter();
 		if(game.getQuarter() == 0) {
 			initialize(game);
 		}
 		else if (game.getQuarter() < 4) {
 			predictGameScore(game);
-			printPrediction(game.getQuarter());
 		}
 		else {
 			finish(game);
@@ -72,14 +73,15 @@ public class ScoreForecaster implements Subscriber {
 		System.out.printf("Correct scores predicted: %d \nPartial correct scores predicted: %d\n", correctPredictions, partialCorrects);
 	}
 	
-//	private void printPredictions(int quarter) {
-//		for(int i = 0;i<quarter;i++) {
-//			int q = i;
-//			int away = awayScorePrediction(q);
-//			int home = homeScorePrediction(q);
-//			System.out.printf("\nPrediction #%d: %d-%d", q,away,home);
-//		}
-//	}
+	private void printPredictions(int quarter) {
+		for(int i = 0;i<quarter;i++) {
+			int q = i;
+			int away = awayScorePrediction(q);
+			int home = homeScorePrediction(q);
+			System.out.printf("\nQuarter#%d prediction: %d-%d", q,away,home);
+		}
+		System.out.println("");
+	}
 	
 	public int[] predictGameScore(Game game) {
 		int score[] = new int[2];
@@ -173,11 +175,25 @@ public class ScoreForecaster implements Subscriber {
 		scorePredictions = new int[4][2];
 		predictGameScore(game);
 		setOutcomePrediction(game.awayTeamName(), game.homeTeamName());
-		printPrediction(game.getQuarter());
+		//printPrediction(game.getQuarter());
 	}
 
-	private void printPrediction(int quarter) {
-		System.out.printf("Predicted score: %d - %d \n", awayScorePrediction(quarter), homeScorePrediction(quarter));
+	public void printPrediction() {
+		if(quarter > 3) {
+			System.out.print("\nGame finished. Quarterly: redictions:");
+			printPredictions(4);
+			
+		}
+		else {
+			System.out.printf("Predicted score: %d - %d \n", awayScorePrediction(quarter), homeScorePrediction(quarter));
+		}
+		
+	}
+	
+	public void printStats() {
+		printScoreAccuracy();
+		printOutcomeAccuracy();
+		printMetrics();
 	}
 
 

@@ -37,7 +37,7 @@ public class Game implements Scoring {
 		gameLog = "";
 		finished = false;
 		System.out.println("-------------------------------------------");
-		System.out.printf("\nNew Game!\nAway Team: %s \nHome Team: %s\n", awayTeamName(), homeTeamName());
+		System.out.printf("\nNew Game!\n%s vs %s\n", awayTeam().toString(), homeTeam().toString());
 	}
 	
 	public void next() {
@@ -114,7 +114,7 @@ public class Game implements Scoring {
 	}
 	
 	public String prettyScore() {
-		return String.format("%d - %d", awayTeamScore(), homeTeamScore());
+		return String.format("\nQuarter: %d\n%s %d - %d %s", getQuarter(), awayTeamName(), awayTeamScore(), homeTeamScore(), homeTeamName());
 	}
 	
 	public int homeTeamScore() {
@@ -150,7 +150,6 @@ public class Game implements Scoring {
 		setQuarter(quarter + 1);
 		String playLog = String.format("\nQuarter: %d\n", getQuarter());
 		playLog = GamePlay.playQuarter(this, playLog);
-		playLog += String.format("\nScore: %s \n", prettyScore());
 		return playLog;
 	}
 	
@@ -176,6 +175,7 @@ public class Game implements Scoring {
 		// avoid duplicate references in arrayList
 		if(!subscribers.contains(subscriber)) {
 			subscribers.add(subscriber);
+			subscriber.update(this);
 		}
 		else {
 			System.out.println("Extra subscriber not added!");

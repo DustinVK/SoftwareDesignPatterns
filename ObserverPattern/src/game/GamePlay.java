@@ -65,17 +65,17 @@ public class GamePlay {
 	}
 
 	public static ArrayList<String> zeroPointLogs = new ArrayList<String>(Arrays.asList(
-	"%s missed a shot.\n",
-	"Bad pass by %s.\n",
-	"Driving layup missed by %s.\n",
-	"%s has the ball stolen from them\n"));
+	"----:%s missed a shot.\n",
+	"----:Bad pass by %s.\n",
+	"----:Driving layup missed by %s.\n",
+	"----:%s has the ball stolen from them\n"));
 	public static ArrayList<String> twoPointLogs = new ArrayList<String>(Arrays.asList(
-	"%s dunks the ball.\n",
-	"2 point shot made by %s.\n",
-	"Driving layup made by %s.\n"));
+	"2pts:%s dunks the ball.\n",
+	"2pts:%s scores a 2 point shot.\n",
+	"2pts:Driving layup made by %s.\n"));
 	public static ArrayList<String>threePointLogs = new ArrayList<String>(Arrays.asList(
-	"Middle court 3-point shot made by %s.\n",
-	"3 point shot made by %s.\n",
-	"%s makes a wild 3 pointer from the other side of the court.\n"));
+	"3pts:Middle court 3-point shot made by %s.\n",
+	"3pts:%s makes a 3 point shot.\n",
+	"3pts:%s makes a wild 3 pointer from the other side of the court.\n"));
 
 }
