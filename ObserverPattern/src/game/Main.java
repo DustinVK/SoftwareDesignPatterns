@@ -1,21 +1,33 @@
 package game;
 
-import java.util.Random;
-
 import observer.HeadlineGenerator;
 import observer.RecordKeeper;
 import observer.ScoreForecaster;
 import subject.Game;
 
 public class Main {
+	
+	static Game game;
+	
+	public static void playGame(int num) {
+		for(int i = 0; i<num; i++) {
+			game.reset();
+			game.next();
+			game.next();
+			game.next();
+			game.next();
+			game.next();
+		}
+		
+	}
 
 	public static void main(String[] args) {
 		
-		Random rand = new Random();
-		
 
-		
-		Game game = new Game();
+
+		TeamManager teamManager = new TeamManager();
+		//teamManager.printTeams();
+		game = new Game(teamManager);
 		ScoreForecaster forcaster = new ScoreForecaster();
 		RecordKeeper keeper = new RecordKeeper();
 		HeadlineGenerator headlines = new HeadlineGenerator();
@@ -24,24 +36,19 @@ public class Main {
 		game.registerSubscriber(forcaster);
 		game.registerSubscriber(headlines);;
 		
-		game.next();
-		game.next();
-		game.next();
-		game.next();
-		int i =0;
-		while(i < 1000) {
-			i++;
-			game.reset();
-			game.next();
-			game.next();
-			game.next();
-			game.next();
-		}
-		game.reset();
-		game.next();
-		game.next();
-		game.next();
-		game.next();
+		playGame(1000);
+		
+		keeper.printRecords();
+		forcaster.printOutcomeAccuracy();
+		forcaster.printScoreAccuracy();
+		forcaster.printMetrics();
+		
+		System.out.println(forcaster.getAccuracy(10, 100));
+//		game.reset();
+//		game.next();
+//		game.next();
+//		game.next();
+//		game.next();
 	
 		//game.next();
 

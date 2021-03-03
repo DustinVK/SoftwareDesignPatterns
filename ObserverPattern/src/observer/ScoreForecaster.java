@@ -1,52 +1,57 @@
 package observer;
 
 import java.util.ArrayList;
-import java.util.Random;
-
-import game.Team;
-/*
- * gives a prediction of score
- */
+import game.GamePlay;
 import subject.Game;
 
 
 public class ScoreForecaster implements Subscriber {
+	final double SCOREMOD = 16; // used to calculate score prediction 
+	final int SIMROUNDS = 100; // number of rounds to simulate when predicting score
 	ArrayList<Float> scoreAccuracies;
-	ArrayList<Integer> outcomeAccuracies;
-	
+	ArrayList<Float> outcomeAccuracies;	
 	int partialCorrects;
 	int correctPredictions;
-	
-	final double SCOREMOD = 11.05; // used to calculate score prediction 
-	final int SIMROUNDS = 100; // number of rounds to simulate when predicting score
-
-	int awayScorePrediction;
-	int homeScorePrediction;
 	String outcomePrediction;
-	
-
+	int scorePredictions[][];
 	
 	public ScoreForecaster() {
 		scoreAccuracies = new ArrayList<Float>();
-		outcomeAccuracies = new ArrayList<Integer>();
+		outcomeAccuracies = new ArrayList<Float>();
+		scorePredictions = new int[3][2];
 		partialCorrects = 0;
 		correctPredictions = 0;
 	}
 	
-	private void checkPredictions(int away, int home) {
-		if((away == awayScorePrediction) && (home == homeScorePrediction)) {
-			correctPredictions ++;
+	public void update(Game game) {
+		if(game.getQuarter() == 0) {
+			initialize(game);
 		}
-		else if ((away == awayScorePrediction) || (home == homeScorePrediction)){
-			partialCorrects ++;
+		else if (game.getQuarter() < 4) {
+			predictGameScore(game);
+			printPrediction(game.getQuarter());
+		}
+		else {
+			finish(game);
+		}
+	}
+	
+	private void checkPredictions(int away, int home) {
+		for(int i =0;i<scorePredictions.length;i++) {
+			if((away == awayScorePrediction(i)) && (home == homeScorePrediction(i))) {
+				correctPredictions ++;
+			}
+			else if ((away == awayScorePrediction(i)) || (home == homeScorePrediction(i))){
+				partialCorrects ++;
+			}
 		}
 	}
 	
 	private void setOutcomePrediction(String awayTeam, String homeTeam) {
-		if(awayScorePrediction > homeScorePrediction) {
+		if(awayScorePrediction(0) > homeScorePrediction(0)) {
 			outcomePrediction = awayTeam;
 		}
-		else if (awayScorePrediction < homeScorePrediction) {
+		else if (awayScorePrediction(0) < homeScorePrediction(0)) {
 			outcomePrediction = homeTeam;
 		}
 		else {
@@ -54,114 +59,125 @@ public class ScoreForecaster implements Subscriber {
 		}
 	}
 	
-	private void compareOutcome(String winner) {
+	private void addOutcomeAccuracies(String winner) {
 		if(winner.equals(outcomePrediction)) {
-			outcomeAccuracies.add(1);
+			outcomeAccuracies.add(0f);
 		}
 		else {
-			outcomeAccuracies.add(0);
+			outcomeAccuracies.add(1f);
 		}
 	}
 
-	private void printMetrics() {
-		System.out.printf("\n corrects: %d partial corrects: %d ", correctPredictions, partialCorrects);
+	public void printMetrics() {
+		System.out.printf("Correct scores predicted: %d \nPartial correct scores predicted: %d\n", correctPredictions, partialCorrects);
 	}
 	
-	private int predictScore(int offenseRating, int defenseRating, int quarter, int currentScore) {
+//	private void printPredictions(int quarter) {
+//		for(int i = 0;i<quarter;i++) {
+//			int q = i;
+//			int away = awayScorePrediction(q);
+//			int home = homeScorePrediction(q);
+//			System.out.printf("\nPrediction #%d: %d-%d", q,away,home);
+//		}
+//	}
+	
+	public int[] predictGameScore(Game game) {
+		int score[] = new int[2];
+		score[0] = predictIndividualScore(game.awayTeam().getOffenseRating(),game.homeTeam().getDefenseRating(), game.getQuarter(),game.awayTeamScore());
+		score[1] = predictIndividualScore(game.homeTeam().getOffenseRating(),game.awayTeam().getDefenseRating(), game.getQuarter(),game.homeTeamScore());
+		scorePredictions[game.getQuarter()] = score;
+		return score;
+	}
+	
+	private int predictIndividualScore(int offenseRating, int defenseRating, int quarter, int currentScore) {
 		int simulatedScore = runScoreSim(offenseRating, defenseRating, quarter, currentScore);
 		double scoreCalculation = calculateScore(offenseRating, defenseRating, quarter, currentScore);
 		int avg = (int) (((simulatedScore * 2) + scoreCalculation) / 3);
 		return avg;
 	}
-
+	
 	private int runScoreSim(int offenseRating, int defenseRating, int quarter, int currentScore) {
 		int total = 0;
 		for(int i = 0; i<SIMROUNDS;i++){
 			total += simulateScore(offenseRating, defenseRating, quarter, currentScore);
 		}
-		
 		int avgTotal = total/SIMROUNDS;
 		return avgTotal;
 	}
-
+	
+	// uses GamePlay.scoreAttempt method to simulate a game
 	private int simulateScore(int offenseRating, int defenseRating, int quarter, int currentScore) {
-		Random rand = new Random();
 		int scoreSimulation = currentScore;
-		
 		int quartersLeft = 4 - quarter;
-		for(int i = 0; i < (Game.ROUNDS*quartersLeft); i++) {
-			int offenseRoll = rand.nextInt(offenseRating);
-			int defenseRoll = rand.nextInt(defenseRating);
-			
-			if (offenseRoll >= defenseRoll) {
-				if ( (offenseRoll - defenseRoll) > 2) {
-					scoreSimulation += 3;
-				}
-				else {
-					scoreSimulation += 2;
-				}
-			}
+		for(int i = 0; i < (GamePlay.ROUNDS*quartersLeft); i++) {
+			scoreSimulation += GamePlay.scoreAttempt(offenseRating, defenseRating);
 		}
 		return scoreSimulation;
 	}
-
+	
+	// calculates an estimated game score with simple function 
 	private double calculateScore(int offenseRating, int defenseRating, int quarter, int currentScore) {
 		int quartersLeft = 4 - quarter;
 		double scoreCalculation = currentScore;
-		
 		int difference = offenseRating - defenseRating;
-	
 		scoreCalculation += (SCOREMOD+difference)*quartersLeft;
 		return scoreCalculation;
 	}
 	
-	public float runningPredictionAccuracy() {
+	public float getRunningAccuracy(ArrayList<Float> list) {
 		float total = 0;
-		for(Float dif : scoreAccuracies) {
+		for(Float dif : list) {
 			total += dif;
 		}
-		
-		return 100 - (100 * (total / scoreAccuracies.size()));
+		return 100 - (100 * (total / list.size()));
 	}
 
-	public float outcomePredictionAccuracy() {
-		int total = 0;
-		for(int dif : outcomeAccuracies) {
-			total += dif;
-		}
-		
-		return (100 * ((float) total / outcomeAccuracies.size()));
+	private void finish(Game game) {
+		checkPredictions(game.awayTeamScore(),game.homeTeamScore());
+		addScoreAccuracies(game);
+		addOutcomeAccuracies(game.winner());
 	}
 
-	public void update(Game game) {
-		if(game.getQuarter() == 0) {
-			awayScorePrediction = predictScore(game.awayTeam().getOffenseRating(),game.homeTeam().getDefenseRating(), game.getQuarter(),game.awayTeamScore());
-			homeScorePrediction = predictScore(game.homeTeam().getOffenseRating(),game.awayTeam().getDefenseRating(), game.getQuarter(),game.homeTeamScore());
-			setOutcomePrediction(game.awayTeamName(), game.homeTeamName());
-			System.out.printf("\nPredicted score: %d - %d \n", awayScorePrediction, homeScorePrediction);
-		}
-		
-		if(game.finished) {
-			checkPredictions(game.awayTeamScore(),game.homeTeamScore());
-			printMetrics();
-			
-			float awayDif = (float) Math.abs(1.0-((float)game.awayTeamScore()/awayScorePrediction));
-			float homeDif = (float) Math.abs(1.0-((float)game.homeTeamScore()/homeScorePrediction));
-			
+	public void addScoreAccuracies(Game game) {
+		for(int i = 0;i<scorePredictions.length;i++) {
+			float awayDif = getAccuracy(game.awayTeamScore(), awayScorePrediction(i));
+			float homeDif = getAccuracy(game.homeTeamScore(), homeScorePrediction(i));
 			scoreAccuracies.add(awayDif);
 			scoreAccuracies.add(homeDif);
-			
-			compareOutcome(game.winner());
-			
-			System.out.printf("\nScore Prediction Accuracy: %f percent", runningPredictionAccuracy());
-			System.out.printf("\nOutcome Prediction Accuracy: %f percent\n", outcomePredictionAccuracy());
-
-			
 		}
 		
-		
-		
-		
+	}
+
+	public int homeScorePrediction(int i) {
+		return scorePredictions[i][1];
+	}
+
+	public int awayScorePrediction(int i) {
+		return scorePredictions[i][0];
+	}
+	
+	public float getAccuracy(int actual, int predicted) {
+		float percentDif = (float) Math.abs(1.0-((float)actual/predicted));
+		return percentDif;
+	}
+
+	public void printOutcomeAccuracy() {
+		System.out.printf("Outcome Prediction Accuracy: %f percent\n", getRunningAccuracy(outcomeAccuracies));
+	}
+
+	public void printScoreAccuracy() {
+		System.out.printf("Score Prediction Accuracy: %f percent\n", getRunningAccuracy(scoreAccuracies));
+	}
+
+	private void initialize(Game game) {
+		scorePredictions = new int[4][2];
+		predictGameScore(game);
+		setOutcomePrediction(game.awayTeamName(), game.homeTeamName());
+		printPrediction(game.getQuarter());
+	}
+
+	private void printPrediction(int quarter) {
+		System.out.printf("Predicted score: %d - %d \n", awayScorePrediction(quarter), homeScorePrediction(quarter));
 	}
 
 

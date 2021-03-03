@@ -1,9 +1,10 @@
 package subject;
 
 import java.util.ArrayList;
-import java.util.Random;
 
-import game.GameHelper;
+import game.TeamManager;
+import game.GamePlay;
+import game.GameRecord;
 import game.Team;
 
 /*
@@ -13,19 +14,19 @@ import game.Team;
 import observer.Subscriber;
 
 public class Game implements Scoring {
-	
-	public final static int ROUNDS = 8; // number of scoring attempt rounds in each quarter
-	
 	Team[] teams;
+	TeamManager teamManager;
 	int[] score;
 	int quarter;
 	String gameLog;
 	public boolean finished;
+	public GameRecord record;
 	
 	ArrayList<Subscriber> subscribers;
 	
-	public Game() {
+	public Game(TeamManager teamManager) {
 		subscribers = new ArrayList<Subscriber>();
+		this.teamManager = teamManager;
 		reset();
 	}
 	
@@ -33,7 +34,6 @@ public class Game implements Scoring {
 		setTeams();
 		setQuarter(0);
 		resetScore();
-		
 		gameLog = "";
 		finished = false;
 		System.out.println("-------------------------------------------");
@@ -42,25 +42,23 @@ public class Game implements Scoring {
 	
 	public void next() {
 		String log = "";
-		notifySubscribers();
-		if (finished) {
-			log = GameHelper.gameResultsToString(winner(), awayTeamScore(), homeTeamScore());
-		}
-		else {
-			
+		if(!finished) {
+			notifySubscribers(); // lets subscribers know game is beginning and updates them on game state
 			log = play();
-			if (quarter == 3) {
-				log = play();
-				finished = true;
+			if(quarter == 4) {
+				log = finishGame(log);
 			}
 		}
-		
 		gameLog += log;
 		System.out.print(log);
-		
-
 	}
 	
+	public void updateScore (int away, int home) {
+		score[0] += away;
+		score[1] += home;
+	}
+	
+	// getters 
 	public String winner() {
 		if(finished) {
 			if (homeTeamScore() > awayTeamScore()) {
@@ -91,47 +89,6 @@ public class Game implements Scoring {
 		}
 	}
 	
-	private String play() {
-		
-		setQuarter(quarter + 1);
-		String playLog = String.format("\nQuarter: %d\n", getQuarter());
-
-		for(int i = 0; i< ROUNDS; i++) {
-			//System.out.printf("%s attempt:\n ", homeTeam().getName());
-			int homeScore = scoreAttempt(homeTeam().getOffenseRating(), awayTeam().getDefenseRating());
-			//System.out.printf("%s attempt:\n ", awayTeam().getName());
-			int awayScore = scoreAttempt(awayTeam().getOffenseRating(), homeTeam().getDefenseRating());
-			updateScore(awayScore, homeScore);
-			playLog += String.format(GameHelper.getPlayLog(homeScore), homeTeam().getName());
-			playLog += String.format(GameHelper.getPlayLog(awayScore), awayTeam().getName());
-			
-		}
-		playLog += String.format("\nScore: %s \n", prettyScore());
-		
-		return playLog;
-	}
-	
-	// Simulates game play - 
-	// each team makes an offense and defense 'roll' based on their skill level to determine points scored or not 
-	private int scoreAttempt(int offense, int defense) {
-		Random rand = new Random();
-		int offenseRoll = rand.nextInt(offense);
-		int defenseRoll = rand.nextInt(defense);
-		int scoreAttempt = 0;
-		
-		if (offenseRoll >= defenseRoll) {
-			if ( (offenseRoll - defenseRoll) > 2) {
-				scoreAttempt = 3;
-			}
-			else {
-				scoreAttempt = 2;
-			}
-		}
-		
-		return scoreAttempt;
-	}
-	
-	
 	public int getQuarter() {
 		return quarter;
 	}
@@ -160,10 +117,43 @@ public class Game implements Scoring {
 		return String.format("%d - %d", awayTeamScore(), homeTeamScore());
 	}
 	
-	private void updateScore (int away, int home) {
-		score[0] += away;
-		score[1] += home;
+	public int homeTeamScore() {
+		return score[1];
 	}
+	
+	public int awayTeamScore() {
+		return score[0];
+	}
+
+	// private methods 
+	private String finishGame(String log) {
+		gameLog += log;
+		System.out.print(log);
+		finished = true;
+		record = new GameRecord(awayTeam().toString(), homeTeam().toString(), winner(), gameLog, score);
+		TeamManager.updateTeamRecords(homeTeam(), awayTeam(), winner());
+		log = gameResultsToString(); // updates subscribers that game has finished
+		notifySubscribers();
+		return log;
+	}
+
+	private String gameResultsToString() {
+		if(finished) {
+			String log;
+			log = GamePlay.gameResultsToString(winner(), awayTeamScore(), homeTeamScore());
+			return log;
+		}
+		else return "gameResultsToString() can't finish because game is still in progress...";
+	}
+	
+	private String play() {
+		setQuarter(quarter + 1);
+		String playLog = String.format("\nQuarter: %d\n", getQuarter());
+		playLog = GamePlay.playQuarter(this, playLog);
+		playLog += String.format("\nScore: %s \n", prettyScore());
+		return playLog;
+	}
+	
 	
 	private void resetScore() {
 		score = new int[2];
@@ -172,20 +162,12 @@ public class Game implements Scoring {
 		
 	}
 	
-	public int homeTeamScore() {
-		return score[1];
-	}
-	
-	public int awayTeamScore() {
-		return score[0];
-	}
-	
 	private void setQuarter(int q) {
 		quarter = q;
 	}
 	
 	private void setTeams() {
-		teams = GameHelper.getTeams();
+		teams = TeamManager.getTeams(2);
 	}
 
 	// Scoring Interface Methods 
