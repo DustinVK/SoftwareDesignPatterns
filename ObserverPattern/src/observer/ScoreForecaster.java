@@ -180,7 +180,7 @@ public class ScoreForecaster implements Subscriber {
 
 	public void printPrediction() {
 		if(quarter > 3) {
-			System.out.print("\nGame finished. Quarterly: redictions:");
+			System.out.print("\nGame finished. Quarterly predictions:");
 			printPredictions(4);
 			
 		}

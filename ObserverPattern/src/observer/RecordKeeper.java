@@ -14,11 +14,14 @@ public class RecordKeeper implements Subscriber {
 	}
 	
 	public void printRecords() {
-		System.out.println("--------------- Game Records ---------------");
+		System.out.println("******************************** Game Records ************************************");
+		System.out.printf("|%21s|%23s|%11s|     Results\n", "Away Team", "Home Team", "Score");
+		System.out.println("----------------------------------------------------------------------------------");
+
 		for(GameRecord record: records) {
 			System.out.println(record.toString());
 		}
-		System.out.println("--------------------------------------------");
+		System.out.println("**********************************************************************************");
 	}
 	
 	private void addRecord(Game game){

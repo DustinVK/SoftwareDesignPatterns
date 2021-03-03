@@ -16,7 +16,9 @@ public class GameRecord {
 	}
 	
 	public String toString() {
-		return String.format("\n%s - %s\n%d - %d\n%s wins.", awayTeam, homeTeam, score[0], score[1], winner);
+		//return String.format("\n%s - %s\n%d - %d\n%s wins.", awayTeam, homeTeam, score[0], score[1], winner);
+		return String.format("\n%21s | %21s | %3d - %3d | %s wins.", awayTeam, homeTeam, score[0], score[1], winner);
+
 	}
 	
 }
