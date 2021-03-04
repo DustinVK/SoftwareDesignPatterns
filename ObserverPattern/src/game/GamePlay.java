@@ -5,19 +5,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-import subject.Game;
-
 public class GamePlay {
 	public final static int ROUNDS = 10;
 	
 	// simulates game play - each team attempts to score each round 
 	public static String playQuarter(Game game, String playLog) {
 		for(int i = 0; i< ROUNDS; i++) {
-			int homeScore = scoreAttempt(game.homeTeam().getOffenseRating(), game.awayTeam().getDefenseRating());
-			int awayScore = scoreAttempt(game.awayTeam().getOffenseRating(), game.homeTeam().getDefenseRating());
+			int homeScore = scoreAttempt(game.teams.homeTeam().getOffenseRating(), game.teams.awayTeam().getDefenseRating());
+			int awayScore = scoreAttempt(game.teams.awayTeam().getOffenseRating(), game.teams.homeTeam().getDefenseRating());
 			game.updateScore(awayScore, homeScore);
-			playLog += String.format(GamePlay.getPlayLog(homeScore), game.homeTeam().getName());
-			playLog += String.format(GamePlay.getPlayLog(awayScore), game.awayTeam().getName());
+			playLog += String.format(GamePlay.getPlayLog(homeScore), game.teams.homeTeam().getName());
+			playLog += String.format(GamePlay.getPlayLog(awayScore), game.teams.awayTeam().getName());
 		}
 		return playLog;
 	}

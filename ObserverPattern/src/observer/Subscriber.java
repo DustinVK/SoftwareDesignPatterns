@@ -1,7 +1,7 @@
 package observer;
 
 
-import subject.Game;
+import game.Game;
 
 /*
  *  Subscriber defines the basic Subscriber interface

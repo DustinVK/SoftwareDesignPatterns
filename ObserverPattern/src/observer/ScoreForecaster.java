@@ -1,8 +1,9 @@
 package observer;
 
 import java.util.ArrayList;
+
+import game.Game;
 import game.GamePlay;
-import subject.Game;
 
 
 public class ScoreForecaster implements Subscriber {
@@ -85,8 +86,8 @@ public class ScoreForecaster implements Subscriber {
 	
 	public int[] predictGameScore(Game game) {
 		int score[] = new int[2];
-		score[0] = predictIndividualScore(game.awayTeam().getOffenseRating(),game.homeTeam().getDefenseRating(), game.getQuarter(),game.awayTeamScore());
-		score[1] = predictIndividualScore(game.homeTeam().getOffenseRating(),game.awayTeam().getDefenseRating(), game.getQuarter(),game.homeTeamScore());
+		score[0] = predictIndividualScore(game.teams.awayTeam().getOffenseRating(),game.teams.homeTeam().getDefenseRating(), game.getQuarter(),game.awayTeamScore());
+		score[1] = predictIndividualScore(game.teams.homeTeam().getOffenseRating(),game.teams.awayTeam().getDefenseRating(), game.getQuarter(),game.homeTeamScore());
 		scorePredictions[game.getQuarter()] = score;
 		return score;
 	}
@@ -174,7 +175,7 @@ public class ScoreForecaster implements Subscriber {
 	private void initialize(Game game) {
 		scorePredictions = new int[4][2];
 		predictGameScore(game);
-		setOutcomePrediction(game.awayTeamName(), game.homeTeamName());
+		setOutcomePrediction(game.teams.awayTeamName(), game.teams.homeTeamName());
 		//printPrediction(game.getQuarter());
 	}
 

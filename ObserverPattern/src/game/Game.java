@@ -1,21 +1,16 @@
-package subject;
+package game;
 
 import java.util.ArrayList;
-
-import game.TeamManager;
-import game.GamePlay;
-import game.GameRecord;
-import game.Team;
 
 /*
  * Game simulates a basketball game between two teams
  */
 
 import observer.Subscriber;
+import subject.Scoring;
 
 public class Game implements Scoring {
-	Team[] teams;
-	TeamManager teamManager;
+	public TeamManager teams;
 	int[] score;
 	int quarter;
 	String gameLog;
@@ -26,18 +21,18 @@ public class Game implements Scoring {
 	
 	public Game(TeamManager teamManager) {
 		subscribers = new ArrayList<Subscriber>();
-		this.teamManager = teamManager;
+		this.teams = teamManager;
 		reset();
 	}
 	
 	public void reset() {
-		setTeams();
+		teams.setTeams();
 		setQuarter(0);
 		resetScore();
 		gameLog = "";
 		finished = false;
 		System.out.println("-------------------------------------------");
-		System.out.printf("\nNew Game!\n%s vs %s\n", awayTeam().toString(), homeTeam().toString());
+		System.out.printf("\nNew Game!\n%s vs %s\n", teams.awayTeam().toString(), teams.homeTeam().toString());
 	}
 	
 	public void next() {
@@ -62,10 +57,10 @@ public class Game implements Scoring {
 	public String winner() {
 		if(finished) {
 			if (homeTeamScore() > awayTeamScore()) {
-				return homeTeam().getName();
+				return teams.homeTeamName();
 			}
 			else if (awayTeamScore() > homeTeamScore()) {
-				return awayTeam().getName();
+				return teams.awayTeamName();
 			}
 			else {
 				return "Tie game, nobody";
@@ -79,10 +74,10 @@ public class Game implements Scoring {
 	
 	public String loser() {
 		if (homeTeamScore() > awayTeamScore()) {
-			return awayTeam().getName();
+			return teams.awayTeam().getName();
 		}
 		else if (awayTeamScore() > homeTeamScore()) {
-			return homeTeam().getName();
+			return teams.homeTeam().getName();
 		}
 		else {
 			return "Tie game, nobody";
@@ -93,28 +88,28 @@ public class Game implements Scoring {
 		return quarter;
 	}
 	
-	public Team homeTeam() {
-		return teams[1];
-	}
-	
-	public String homeTeamName() {
-		return teams[1].getName();
-	}
-	
-	public Team awayTeam() {
-		return teams[0];
-	}
-	
-	public String awayTeamName() {
-		return teams[0].getName();
-	}
+//	public Team homeTeam() {
+//		return teams[1];
+//	}
+//	
+//	public String homeTeamName() {
+//		return teams[1].getName();
+//	}
+//	
+//	public Team awayTeam() {
+//		return teams[0];
+//	}
+//	
+//	public String awayTeamName() {
+//		return teams[0].getName();
+//	}
 	
 	public int[] score() {
 		return score;
 	}
 	
 	public String prettyScore() {
-		return String.format("\nQuarter: %d\n%s %d - %d %s", getQuarter(), awayTeamName(), awayTeamScore(), homeTeamScore(), homeTeamName());
+		return String.format("\nQuarter: %d\n%s %d - %d %s", getQuarter(), teams.awayTeamName(), awayTeamScore(), homeTeamScore(), teams.homeTeamName());
 	}
 	
 	public int homeTeamScore() {
@@ -130,8 +125,8 @@ public class Game implements Scoring {
 		gameLog += log;
 		System.out.print(log);
 		finished = true;
-		record = new GameRecord(awayTeam().toString(), homeTeam().toString(), winner(), gameLog, score);
-		TeamManager.updateTeamRecords(homeTeam(), awayTeam(), winner());
+		record = new GameRecord(teams.awayTeam().toString(), teams.homeTeam().toString(), winner(), gameLog, score);
+		TeamManager.updateTeamRecords(teams.homeTeam(), teams.awayTeam(), winner());
 		log = gameResultsToString(); // updates subscribers that game has finished
 		notifySubscribers();
 		return log;
@@ -165,9 +160,9 @@ public class Game implements Scoring {
 		quarter = q;
 	}
 	
-	private void setTeams() {
-		teams = TeamManager.getTeams(2);
-	}
+//	private void setTeams() {
+//		teams = TeamManager.getRandomTeams(2);
+//	}
 
 	// Scoring Interface Methods 
 	@Override

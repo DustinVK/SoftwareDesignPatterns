@@ -12,12 +12,36 @@ import java.util.Random;
 public class TeamManager {
 	
 	private static Team[] teamArr;
+	Team[] currentTeams;
+
 	
 	public TeamManager() {
-		resetTeams();
+		currentTeams = new Team[2];
+		resetTeamArr();
+		setTeams();
 	}
 	
-	public void resetTeams() {
+	public void setTeams() {
+		currentTeams = getRandomTeams(2);
+	}
+	
+	public Team homeTeam() {
+		return currentTeams[1];
+	}
+	
+	public String homeTeamName() {
+		return currentTeams[1].getName();
+	}
+	
+	public Team awayTeam() {
+		return currentTeams[0];
+	}
+	
+	public String awayTeamName() {
+		return currentTeams[0].getName();
+	}
+	
+	public void resetTeamArr() {
 		teamArr = new Team[teamList.size()];
 		Collections.shuffle(teamList);
 		int i = 0;
@@ -28,7 +52,7 @@ public class TeamManager {
 		}
 	}
 	
-	public static Team[] getTeams(int quantity) {
+	public static Team[] getRandomTeams(int quantity) {
 		Team[] teams = new Team[quantity];
 		Random rand = new Random();
 		int index = rand.nextInt(teamList.size()-2);

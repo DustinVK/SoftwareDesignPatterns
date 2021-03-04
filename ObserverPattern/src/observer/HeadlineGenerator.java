@@ -1,6 +1,6 @@
 package observer;
 
-import subject.Game;
+import game.Game;
 
 public class HeadlineGenerator implements Subscriber 
 {
@@ -26,7 +26,7 @@ public class HeadlineGenerator implements Subscriber
 	private void setHeadline(Game game) {
 		int difference = game.awayTeamScore() - game.homeTeamScore();
 		if (difference == 0) {
-			headline = String.format("%s ties %s!\n\n", game.awayTeam().getName(), game.homeTeam().getName());
+			headline = String.format("%s ties %s!\n\n", game.teams.awayTeamName(), game.teams.homeTeamName());
 		}	
 		else if (difference > 40 || difference < -40) {
 			headline = String.format("%s humiliates %s!\n\n", game.winner(), game.loser());

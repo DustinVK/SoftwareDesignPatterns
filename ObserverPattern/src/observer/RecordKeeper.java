@@ -2,8 +2,8 @@ package observer;
 
 import java.util.ArrayList;
 
+import game.Game;
 import game.GameRecord;
-import subject.Game;
 
 public class RecordKeeper implements Subscriber {
 	

@@ -6,10 +6,8 @@ import java.util.Scanner;
 import observer.HeadlineGenerator;
 import observer.RecordKeeper;
 import observer.ScoreForecaster;
-import subject.Game;
 
 public class Main {
-	
 	static Game game;
 	static TeamManager teamManager;
 	static boolean playing = true;
@@ -18,14 +16,22 @@ public class Main {
 	static RecordKeeper keeper;
 	static HeadlineGenerator headlines;
 	
+	public static void main(String[] args) {
+		System.out.println("Welcome! Setting up new game...");
+		initialize();
+		Scanner input = new Scanner(System.in);
+		while(playing) {
+			handleInput(getInput(input));
+		}
+		
+		System.out.println("Goodbye!");
+	
+	}
+	
 	public static void playGame(int num) {
 		for(int i = 0; i<num; i++) {
 			game.reset();
-			game.next();
-			game.next();
-			game.next();
-			game.next();
-			game.next();
+			for(int j=0;j<5;j++) { game.next(); }
 		}
 		
 	}
@@ -61,46 +67,91 @@ public class Main {
 	}
 	
 	private static void handleInput(int num) {
-		if(num == 0) {
-			playing = false;
-			
+		switch (num) {
+			case 0:
+				playing = false;
+				break;
+			case 1:
+				makeNewGame();
+				break;
+			case 2:
+				if(game.finished) {
+					System.out.println("Game Over... enter [1] to start a new game.");
+				}
+				else {
+					game.next();
+				}
+				break;
+			case 3:
+				System.out.println(game.prettyScore());
+				break;
+			case 4:
+				forcaster.printPrediction();
+				break;
+			case 5:
+				forcaster.printStats();
+				break;
+			case 6:
+				keeper.printRecords();
+				break;
+			case 7:
+				headlines.printHeadline();
+				break;
+			case 8:
+				playGame(10);
+				break;
+			case 9:
+				System.out.println("Resetting everything...");
+				initialize();
+				break;
+			default:
+				System.out.println("Oops, handling input went wrong.");
+				break;
+				
 		}
-		else if(num == 1){
-			makeNewGame();
-		}
-		else if(num == 2){
-			if(game.finished) {
-				System.out.println("Game Over... enter [1] to start a new game.");
-			}
-			else {
-				game.next();
-			}
-		}
-		else if(num == 3){
-			System.out.println(game.prettyScore());
-		}
-		else if(num == 4){
-			forcaster.printPrediction();
-		}
-		else if(num == 5){
-			forcaster.printStats();
-		}
-		else if(num == 6){
-			keeper.printRecords();
-		}
-		else if(num == 7){
-			headlines.printHeadline();
-		}
-		else if(num == 8) {
-			playGame(10);
-		}
-		else if(num == 9) {
-			System.out.println("Resetting everything...");
-			initialize();
-		}
-		else {
-			System.out.println("Oops, handling input went wrong.");
-		}
+		
+//		if(num == 0) {
+//			playing = false;
+//			
+//		}
+//		else if(num == 1){
+//			makeNewGame();
+//		}
+//		else if(num == 2){
+//			if(game.finished) {
+//				System.out.println("Game Over... enter [1] to start a new game.");
+//			}
+//			else {
+//				game.next();
+//			}
+//		}
+//		else if(num == 3){
+//			System.out.println(game.prettyScore());
+//		}
+//		else if(num == 4){
+//			forcaster.printPrediction();
+//		}
+//		else if(num == 5){
+//			forcaster.printStats();
+//		}
+//		else if(num == 6){
+//			keeper.printRecords();
+//		}
+//		else if(num == 7){
+//			headlines.printHeadline();
+//		}
+//		else if(num == 8) {
+//			playGame(10);
+//		}
+//		else if(num == 9) {
+//			System.out.println("Resetting everything...");
+//			initialize();
+//		}
+//		else {
+//			System.out.println("Oops, handling input went wrong.");
+//		}
+		
+
 		
 	}
 
@@ -111,19 +162,6 @@ public class Main {
 		game.registerSubscriber(headlines);
 	}
 
-	public static void main(String[] args) {
-		System.out.println("Welcome! Setting up new game...");
-		initialize();
-		Scanner input = new Scanner(System.in);
-		while(playing) {
-			handleInput(getInput(input));
-		}
-		
-		System.out.println("Goodbye!");
-		
-		
-
-	}
 
 	private static void initialize() {
 		teamManager = new TeamManager();
