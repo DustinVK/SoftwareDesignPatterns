@@ -1,6 +1,10 @@
 # SoftwareDesignPatterns
+A project to study software architecture design patterns.  
+
+The program simulates basketball games. Teams are assigned offense and defense ratings. Scoring is based on those ratings. A a table of previous game scores is kept during the session. There is a prediction class that attempts to predict the final score of the game before each quarter. Predictions metrics are tracked, but not currently stored.
 
 ## Observer Pattern 
+
 Adjusted implementation of observer pattern to fit the given project structure. 
 * Scoring Interface acts as the Subject interface that defines method structure for notifying and managing Observers
 * Subscriber Interface acts as the Observer interface that defines the update method structure for being notified by a Scoring class 
